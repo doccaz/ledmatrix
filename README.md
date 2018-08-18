@@ -7,10 +7,27 @@ This uses eight MAX7219 8x8 LED matrix displays in series.
 
 I used two 4-display from Banggood: https://www.banggood.com/en/MAX7219-Dot-Matrix-Module-4-in-1-Display-For-Arduino-p-1072083.html, and just connected them to each other.
 
-For the microcontroller, I used a Wemos D1 Mini Pro. This microcontroller is ESP8266-based, and has both bluetooth and WiFi, and has 16MB of flash onboard. There is an Arduino IDE plugin available from www.wemos.cc . I bought mine from here: https://www.banggood.com/Wemos-D1-Mini-V3_0_0-WIFI-Internet-Of-Things-Development-Board-Based-ESP8266-4MB-p-1264245.html
+For the microcontroller, I used a Wemos D1 Mini Pro. This microcontroller is ESP8266-based, and has both bluetooth and WiFi, and has 16MB of flash onboard. There is an Arduino IDE plugin available from www.wemos.cc. I bought mine from here: https://www.banggood.com/Wemos-D1-Mini-V3_0_0-WIFI-Internet-Of-Things-Development-Board-Based-ESP8266-4MB-p-1264245.html
 
 I used a "1-button shield" on top of the Wemos for resetting/displaying configuration. It's wired to D3.
 This shield can be bought here: https://www.banggood.com/WeMos-1-Button-Shield-For-WeMos-D1-Mini-Button-p-1160501.html
+
+# features
+
+So far I added the following features:
+ - controllable speed
+ - controllable brightness
+ - customizable SSID and password for the wifi
+ - all parameters are saved on the internal flash
+ - persistent message (saved in flash, survives power cycling)
+
+# software requirements
+
+You'll need: 
+
+- Arduino IDE with WeMOS support added (from wemos.cc)
+- Adafruit GFX library
+- SPIFFS library
 
 # about SPIFSS
 
@@ -26,7 +43,7 @@ right before this line:
 
   bool EspClass::flashEraseSector(uint32_t sector) {
 
-The SPIFFS filesystem must first be initialized with SPIFFS.format(). This can take a few minutes. This allows the configuration file to be read/written to.
+
 
 # putting it all together
 
@@ -39,15 +56,10 @@ Connections:
 
 The 1-button shield is wired to D3.
 
-# features
+The SPIFFS filesystem must first be initialized with SPIFFS.format(). This can take a few minutes. This allows the configuration file to be read/written to. Use the provided sketch (spifftest.ino).
 
-So far I added the following features:
- - controllable speed
- - controllable brightness
- - customizable SSID and password for the wifi
- - all parameters are saved on the internal flash
- - persistent message (saved in flash, survives power cycling)
- 
+Then, upload the matrixdisplay.ino sketch to the WeMOS D1, and you're done!
+
 # using it
 
  - Connect to the SSID with the password shown.
