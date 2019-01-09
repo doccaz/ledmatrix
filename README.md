@@ -77,10 +77,12 @@ To reset the configuration:
  
 It works just fine from a regular 500mA USB port. A 10.000mA USB powerbank was able to power it for at least 12 hours.
 
+# accented characters
+
+ The provided standard Adafruit font DOES have accented characters, but they're not easily accessible. It conforms to the old CP437 extended set (sort of...). I implemented mappings for the most common accented characters, so it SHOULD work fine. However, there are some ambiguous and wrongly drawn characters in the font, which would require for the library itself to be fixed. Maybe I will draw a new font from scratch in the future.
 
 # to-do
  - add HTML template support, so we can change themes on the web UI
- - add accented characters to the standard Adafruit font
  - add scroll effects
  - add RTC support
  

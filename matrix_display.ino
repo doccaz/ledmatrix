@@ -47,6 +47,7 @@ To reset the configuration:
 #include <Adafruit_GFX.h>
 #include <Max72xxPanel.h>
 #include "FS.h"
+#include "fonts.h" // available fonts
 
 // default values
 const char *DEFAULT_SSID = "ledmatrix-WEMOS"; 
@@ -78,6 +79,7 @@ const int buttonPin = D3;
 int buttonState = 0;
 
 // function prototypes
+void filterSpecialChars();
 String getMessageForm(void);
 String getSetupForm(void);
 String getFooter(void);
@@ -171,6 +173,22 @@ String translateChars(String message)
   message.replace("%3E", ">");
   message.replace("%3F", "?");  
   message.replace("%40", "@");
+  message.replace("%E1", "á"); // a-acute
+  message.replace("%E9", "é"); // e-acute
+  message.replace("%ED", "í"); // i-acute
+  message.replace("%F3", "ó"); // o-acute
+  message.replace("%FA", "ú"); // u-acute
+  message.replace("%E0", "à"); // a-grave
+  message.replace("%E8", "è"); // e-grave
+  message.replace("%EC", "ì"); // i-grave
+  message.replace("%F2", "ò"); // o-grave
+  message.replace("%E3", "ã"); // a-tilde
+  message.replace("%F5", "õ"); // o-tilde
+  message.replace("%F1", "ñ"); // n-tilde
+
+
+
+//  %E1%E9%ED%F3%FA%E0%E8%EC%F2%F9%E3%F5%F1
   return message;
 }
 /*
@@ -227,6 +245,8 @@ void handle_setup() {
 
 void showMsg()
 {
+  filterSpecialChars();
+  
   Serial.printf("showing message: %s\n", decodedMsg.c_str());
   for ( int i = 0 ; i < width * decodedMsg.length() + matrix.width() - 1 - spacer; i++ ) {
     server.handleClient();                        // checks for incoming messages
@@ -281,7 +301,10 @@ void setup(void) {
   matrix.setRotation(6, 1);
   matrix.setRotation(7, 1);
   
+  // set starting message
   decodedMsg="starting...";
+
+
   showMsg();
   
   bool result = SPIFFS.begin();
@@ -510,5 +533,134 @@ void loop(void) {
   }
    
   showMsg();
+}
+
+void filterSpecialChars()
+{
+  char msg[255];
+  memset(&msg, 0, sizeof(msg));
+
+  sprintf(msg, "%s", decodedMsg.c_str());
+  decodedMsg = "";
+  
+  for (int f=0; f < strlen(msg); f++)
+  {
+      Serial.printf("%d = %c (%X)\n", f, msg[f], msg[f]);
+    
+  }
+  for (int f=0; f < strlen(msg); f++)
+  {
+    if (msg[f] == 0xC3 || msg[f] == 0xCB) {
+        Serial.println("ignorando marcador");
+    } else decodedMsg += msg[f];
+  };
+
+
+ // translate accented characters
+ // The lines with +0x40 are to convert the same characters, but coming from the URL encoded scheme.
+  decodedMsg.replace(0xA1, 143); // a-acute
+  decodedMsg.replace(0xA9, 144); // e-acute
+  decodedMsg.replace(0xAD, 161); // i-acute
+  decodedMsg.replace(0xB3, 111); // o-acute
+  decodedMsg.replace(0xBA, 163); // u-acute
+
+  decodedMsg.replace(0xA1+0x40, 143); // a-acute
+  decodedMsg.replace(0xA9+0x40, 144); // e-acute
+  decodedMsg.replace(0xAD+0x40, 161); // i-acute
+  decodedMsg.replace(0xB3+0x40, 111); // o-acute
+  decodedMsg.replace(0xBA+0x40, 163); // u-acute
+  
+  decodedMsg.replace(0x81, 143); // A-acute
+  decodedMsg.replace(0x89, 144); // E-acute
+  decodedMsg.replace(0x8D, 161); // I-acute
+  decodedMsg.replace(0x93, 111); // O-acute
+  decodedMsg.replace(0x9A, 163); // U-acute
+
+  decodedMsg.replace(0x81+0x40, 143); // A-acute
+  decodedMsg.replace(0x89+0x40, 144); // E-acute
+  decodedMsg.replace(0x8D+0x40, 161); // I-acute
+  decodedMsg.replace(0x93+0x40, 111); // O-acute
+  decodedMsg.replace(0x9A+0x40, 163); // U-acute
+
+  decodedMsg.replace(0xA0, 133); // a-grave
+  decodedMsg.replace(0xA8, 138); // e-grave
+  decodedMsg.replace(0xAC, 141); // i-grave
+  decodedMsg.replace(0xB2, 111); // o-grave
+  decodedMsg.replace(0xB9, 151); // u-grave
+
+  decodedMsg.replace(0xA0+0x40, 133); // a-grave
+  decodedMsg.replace(0xA8+0x40, 138); // e-grave
+  decodedMsg.replace(0xAC+0x40, 141); // i-grave
+  decodedMsg.replace(0xB2+0x40, 111); // o-grave
+  decodedMsg.replace(0xB9+0x40, 151); // u-grave
+
+  decodedMsg.replace(0x80, 133); // A-grave
+  decodedMsg.replace(0x88, 138); // E-grave
+  decodedMsg.replace(0x8C, 141); // I-grave
+  decodedMsg.replace(0x92, 111); // O-grave
+  decodedMsg.replace(0x99, 151); // U-grave
+
+  decodedMsg.replace(0x80+0x40, 133); // A-grave
+  decodedMsg.replace(0x88+0x40, 138); // E-grave
+  decodedMsg.replace(0x8C+0x40, 141); // I-grave
+  decodedMsg.replace(0x92+0x40, 111); // O-grave
+  decodedMsg.replace(0x99+0x40, 151); // U-grave
+  
+  decodedMsg.replace(0xA3, 132); // a-tilde
+  decodedMsg.replace(0xB5, 148); // o-tilde
+  decodedMsg.replace(0xB1, 164); // n-tilde
+  decodedMsg.replace(0x83, 132); // A-tilde
+  decodedMsg.replace(0x95, 148); // O-tilde
+  decodedMsg.replace(0x91, 165); // N-tilde
+
+  decodedMsg.replace(0xA3+0x40, 132); // a-tilde
+  decodedMsg.replace(0xB5+0x40, 148); // o-tilde
+  decodedMsg.replace(0xB1+0x40, 164); // n-tilde
+  decodedMsg.replace(0x83+0x40, 132); // A-tilde
+  decodedMsg.replace(0x95+0x40, 148); // O-tilde
+  decodedMsg.replace(0x91+0x40, 165); // N-tilde
+  
+  decodedMsg.replace(0xA2, 131); // a-circ
+  decodedMsg.replace(0xAA, 136); // e-circ
+  decodedMsg.replace(0xAE, 140); // i-circ
+  decodedMsg.replace(0xB4, 147); // o-circ
+  decodedMsg.replace(0xBB, 150); // u-circ
+
+  decodedMsg.replace(0xA2+0x40, 131); // a-circ
+  decodedMsg.replace(0xAA + 0x40, 136); // e-circ
+  decodedMsg.replace(0xAE + 0x40, 140); // i-circ
+  decodedMsg.replace(0xB4+0x40, 147); // o-circ
+  decodedMsg.replace(0xBB+0x40, 150); // u-circ
+  
+  decodedMsg.replace(0x82, 131); // A-circ
+  decodedMsg.replace(0x8A, 136); // E-circ
+  decodedMsg.replace(0x8E, 140); // I-circ
+  decodedMsg.replace(0x94, 147); // O-circ
+  decodedMsg.replace(0x9B, 150); // U-circ
+
+  decodedMsg.replace(0x82+0x40, 131); // A-circ
+  decodedMsg.replace(0x8A + 0x40, 136); // E-circ
+  decodedMsg.replace(0x8E + 0x40, 140); // I-circ
+  decodedMsg.replace(0x94+0x40, 147); // O-circ
+  decodedMsg.replace(0x9B+0x40, 150); // U-circ
+  
+  decodedMsg.replace(0xA7, 135); // c-cedilla
+  decodedMsg.replace(0x87, 128); // C-cedilla
+  decodedMsg.replace(0x9C, 156); // tilde
+  decodedMsg.replace(0x60, 39); // grave
+  decodedMsg.replace(0x86, 94); // circunflex
+
+  decodedMsg.replace(0xA7+0x40, 135); // c-cedilla
+  decodedMsg.replace(0x87+0x40, 128); // C-cedilla
+  decodedMsg.replace(0x9C+0x40, 156); // tilde
+  decodedMsg.replace(0x60+0x40, 39); // grave
+  decodedMsg.replace(0x86+0x40, 94); // circunflex
+  
+   for (int f=0; f < sizeof(decodedMsg); f++)
+  {
+      Serial.printf("%d = %c (%X)\n", f, decodedMsg[f], decodedMsg[f]);
+    
+  }
+
 }
 
